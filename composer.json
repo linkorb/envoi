@@ -1,0 +1,16 @@
+{
+  "name": "linkorb/envoi",
+  "description": "Environment variables on steroids",
+  "keywords": ["envoi"],
+  "license": "MIT",
+  "autoload":{
+    "psr-4":{
+      "Envoi\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^7.0",
+    "symfony/dotenv": "^4.0",
+    "symfony/yaml": "^4.0"
+  }
+}
