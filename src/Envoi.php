@@ -56,7 +56,7 @@ class Envoi
             $envContent = file_get_contents($envPath);
             $envVars = $dotenv->parse($envContent);
 
-            self::applyMetadata($envVars, $meta);
+            $envVars = self::applyMetadata($envVars, $meta);
 
             $dotenv->populate($envVars);
         } else {
@@ -98,10 +98,11 @@ class Envoi
 
     /**
      * @param $envVars
-     * @param $meta Metadata[]
+     * @param array $meta
+     * @return array
      * @throws InvalidEnvException
      */
-    public static function applyMetadata($envVars, array $meta)
+    public static function applyMetadata($envVars, array $meta): array
     {
         foreach ($meta as $key => $metadata) {
             $value = $envVars[$key] ?? null;
@@ -111,6 +112,10 @@ class Envoi
             }
 
             if (!$value) {
+                if ($metadata->default) {
+                    $value = $metadata->default;
+                    $envVars[$key]  = $value;
+                }
                 continue;
             }
 
@@ -135,5 +140,8 @@ class Envoi
 
             $envVars[$key]  = $value;
         }
+
+        return $envVars;
     }
+
 }
