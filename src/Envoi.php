@@ -126,7 +126,7 @@ class Envoi
                 throw new InvalidEnvException(sprintf('Env variable "%s" is not valid url', $key));
             }
             if ($metadata->type === Metadata::TYPE_PATH) {
-                if (!is_path($value)) {
+                if (!is_file($value) && !is_dir($value)) {
                     throw new InvalidEnvException(sprintf('Env variable "%s" is not valid path', $key));
                 }
 
@@ -144,4 +144,26 @@ class Envoi
         return $envVars;
     }
 
+
+    public static function markdown(): string
+    {
+        // TODO
+    }
+
+    public static function runConsole()
+    {
+        $method = isset($argv[1]) ?? 'validate';
+
+        switch ($method) {
+            case 'validate':
+                break;
+            case 'configure':
+                break;
+            case 'documentation':
+                break;
+            default:
+                // TODO help
+                return;
+        }
+    }
 }
