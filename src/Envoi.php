@@ -5,97 +5,135 @@ namespace Envoi;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Yaml\Yaml;
 
-
-class MetaItem {
-    const TYPE_STRING = 'string';
-    const TYPE_INT = 'int';
-    const TYPE_URL = 'url';
-    const TYPE_PATH = 'path';
-
-    public $type = self:: TYPE_STRING;
-    public $description;
-    public $required;
-    public $default;
-    public $example;
-    public $makeAbsolutePath;
-    public $options;
-}
-
 /**
  * Class Envoi
  * @author Aleksandr Arofikin <sashaaro@gmail.com>
  */
 class Envoi
 {
-    public static function init($envPath = null, $meta = null)
+    public const DEFAULT_META_FILE_NAME = '.env.yaml';
+
+    public static function getDefaultFolder()
+    {
+        return dirname($_SERVER["SCRIPT_FILENAME"]);
+    }
+
+    /**
+     * @param string|null $envPath
+     * @param string|null $metaPath
+     * @throws InvalidEnvException
+     */
+    public static function init(string $envPath = null, string $metaPath = null)
     {
         if (!$envPath) {
-            $envPath = '.env';
+            $envPath = self::getDefaultFolder() . DIRECTORY_SEPARATOR . '.env';
         }
 
-        if ($meta) {
-            if (!is_file($meta)) {
-                throw new \InvalidArgumentException(sprintf('No meta file %s', $meta));
+        if (!is_file($envPath)) {
+            throw new \InvalidArgumentException(sprintf('No env file "%s"', $envPath));
+        }
+
+        if (!is_readable($envPath)) {
+            throw new \InvalidArgumentException(sprintf('Env file "%s" is not readable', $envPath));
+        }
+
+
+        if ($metaPath) {
+            if (!is_file($metaPath)) {
+                throw new \InvalidArgumentException(sprintf('No meta file "%s"', $metaPath));
             }
         } else {
-            if (is_file('.env.yaml')) {
-                $meta = '.env.yaml';
-            }
-        }
-        if ($meta) {
-            $meta = Yaml::parseFile($meta);
-        }
+            $defaultFilePath =  self::getDefaultFolder() . DIRECTORY_SEPARATOR . self::DEFAULT_META_FILE_NAME;
 
-        $varsMeta = [];
-        foreach ($meta as $key => $item) {
-            $metaItem = new MetaItem();
-            $varsMeta[$key] = $metaItem;
+            if (is_file($defaultFilePath)) {
+                $metaPath = $defaultFilePath;
+            }
         }
 
         $dotenv = new Dotenv();
-        $envVars = $dotenv->parse(file_get_contents($envPath));
+        if ($metaPath) {
+            $meta = self::metaFromYamlFile($metaPath);
+            $envContent = file_get_contents($envPath);
+            $envVars = $dotenv->parse($envContent);
+
+            self::applyMetadata($envVars, $meta);
+
+            $dotenv->populate($envVars);
+        } else {
+            $dotenv->load($envPath);
+        }
+    }
+
+    /**
+     * @param $metaPath
+     * @return Metadata[]
+     */
+    public static function metaFromYamlFile($metaPath)
+    {
+        $metaContent = Yaml::parseFile($metaPath);
+
+        $meta = [];
+        if (!$metaContent) {
+            return [];
+        }
+
+        foreach ($metaContent as $key => $item) {
+            $metadata = new Metadata();
+            $metadata->type = $item['type'] ?? Metadata::TYPE_STRING;
+            $metadata->description = $item['description'] ?? null;
+            $metadata->required = $item['required'] ?? false;
+            $metadata->default = $item['default'] ?? null;
+            $metadata->example = $item['example'] ?? null;
+            $metadata->makeAbsolutePath = $item['make_absolute_path'] ?? null;
+
+            if (isset($item['options'])) {
+                $metadata->options = explode(',', $item['options']);
+            }
+
+            $meta[$key] = $metadata;
+        }
+
+        return $meta;
     }
 
     /**
      * @param $envVars
-     * @param $varsMeta MetaItem[]
+     * @param $meta Metadata[]
+     * @throws InvalidEnvException
      */
-    public static function validate($envVars, $varsMeta)
+    public static function applyMetadata($envVars, array $meta)
     {
-        foreach ($varsMeta as $key => $meta) {
-            if ($meta->required && !isset($envVars[$key])) {
-                throw new \InvalidArgumentException('');// TODO custom exception
+        foreach ($meta as $key => $metadata) {
+            $value = $envVars[$key] ?? null;
+
+            if ($metadata->required && !$value) {
+                throw new InvalidEnvException(sprintf('Env variable "%s" is required', $key));
             }
-            $value = $envVars[$key];
-            if ($meta->type === MetaItem::TYPE_INT && !is_numeric($value)) {
-                throw new \InvalidArgumentException('');// TODO custom exception
+
+            if (!$value) {
+                continue;
             }
-            if ($meta->type === MetaItem::TYPE_URL && filter_var($value, FILTER_VALIDATE_URL) === false) {
-                throw new \InvalidArgumentException('');// TODO custom exception
+
+            if ($metadata->type === Metadata::TYPE_INT && !is_numeric($value)) {
+                throw new InvalidEnvException(sprintf('Env variable "%s" should be int', $key));
             }
-            if ($meta->type === MetaItem::TYPE_PATH) {
+            if ($metadata->type === Metadata::TYPE_URL && filter_var($value, FILTER_VALIDATE_URL) === false) {
+                throw new InvalidEnvException(sprintf('Env variable "%s" is not valid url', $key));
+            }
+            if ($metadata->type === Metadata::TYPE_PATH) {
                 if (!is_path($value)) {
-                    throw new \InvalidArgumentException('');// TODO custom exception
+                    throw new InvalidEnvException(sprintf('Env variable "%s" is not valid path', $key));
                 }
 
-                $value = realpath($value);
+                if ($metadata->makeAbsolutePath) {
+                    $value = realpath($value);
+                }
             }
-            if ($meta->options && !in_array($value, explode(',', $meta->options))) {
-                throw new \InvalidArgumentException('');// TODO custom exception
+            if ($metadata->options && !in_array($value, $metadata->options)) {
+                throw new InvalidEnvException(sprintf('Env variable "%s" is not included in options "%s"', $key, implode($metadata->options, ', ')));
             }
 
             $envVars[$key]  = $value;
         }
     }
-
-    /**
-     * @param $envVars
-     * @param $varsMeta MetaItem[]
-     */
-    public static function update ($envVars, $varsMeta)
-    {
-
-    }
 }
-
-Envoi::init(__DIR__ . '/../.env');
