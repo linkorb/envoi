@@ -2,7 +2,9 @@
 
 namespace Envoi;
 
+
 use Symfony\Component\Dotenv\Dotenv;
+
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -11,11 +13,18 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Envoi
 {
+    public const DEFAULT_FOLDER = '.';
+    public const DEFAULT_ENV_FILE_NAME = '.env';
     public const DEFAULT_META_FILE_NAME = '.env.yaml';
 
-    public static function getDefaultFolder()
+    public static function getDefaultEnvPath()
     {
-        return dirname($_SERVER["SCRIPT_FILENAME"]);
+        return self::DEFAULT_FOLDER . DIRECTORY_SEPARATOR . self::DEFAULT_ENV_FILE_NAME;
+    }
+
+    public static function getDefaultMetaPath()
+    {
+        return self::DEFAULT_FOLDER . DIRECTORY_SEPARATOR . self::DEFAULT_META_FILE_NAME;
     }
 
     /**
@@ -26,7 +35,7 @@ class Envoi
     public static function init(string $envPath = null, string $metaPath = null)
     {
         if (!$envPath) {
-            $envPath = self::getDefaultFolder() . DIRECTORY_SEPARATOR . '.env';
+            $envPath = self::getDefaultEnvPath();
         }
 
         if (!is_file($envPath)) {
@@ -43,7 +52,7 @@ class Envoi
                 throw new \InvalidArgumentException(sprintf('No meta file "%s"', $metaPath));
             }
         } else {
-            $defaultFilePath =  self::getDefaultFolder() . DIRECTORY_SEPARATOR . self::DEFAULT_META_FILE_NAME;
+            $defaultFilePath =  self::getDefaultMetaPath();
 
             if (is_file($defaultFilePath)) {
                 $metaPath = $defaultFilePath;
@@ -56,7 +65,7 @@ class Envoi
             $envContent = file_get_contents($envPath);
             $envVars = $dotenv->parse($envContent);
 
-            $envVars = self::applyMetadata($envVars, $meta);
+            $envVars = self::validate($envVars, $meta);
 
             $dotenv->populate($envVars);
         } else {
@@ -84,7 +93,12 @@ class Envoi
             $metadata->required = $item['required'] ?? false;
             $metadata->default = $item['default'] ?? null;
             $metadata->example = $item['example'] ?? null;
-            $metadata->makeAbsolutePath = $item['make_absolute_path'] ?? null;
+
+            if (isset($item['make-absolute-path'])) {
+                if ($item['make-absolute-path'] === 'true') {
+                    $metadata->makeAbsolutePath = true;
+                }
+            }
 
             if (isset($item['options'])) {
                 $metadata->options = explode(',', $item['options']);
@@ -98,11 +112,11 @@ class Envoi
 
     /**
      * @param $envVars
-     * @param array $meta
+     * @param Metadata[] $meta
      * @return array
      * @throws InvalidEnvException
      */
-    public static function applyMetadata($envVars, array $meta): array
+    public static function validate($envVars, array $meta): array
     {
         foreach ($meta as $key => $metadata) {
             $value = $envVars[$key] ?? null;
@@ -148,22 +162,5 @@ class Envoi
     public static function markdown(): string
     {
         // TODO
-    }
-
-    public static function runConsole()
-    {
-        $method = isset($argv[1]) ?? 'validate';
-
-        switch ($method) {
-            case 'validate':
-                break;
-            case 'configure':
-                break;
-            case 'documentation':
-                break;
-            default:
-                // TODO help
-                return;
-        }
     }
 }
