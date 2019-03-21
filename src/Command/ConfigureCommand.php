@@ -3,14 +3,13 @@
 namespace Envoi\Command;
 
 use Envoi\Envoi;
-use Envoi\FormType\EnvConfigurationType;
-use Matthias\SymfonyConsoleForm\Console\Formatter\Format;
-use Matthias\SymfonyConsoleForm\Console\Helper\FormHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\Question;
 
 /**
  * Class ConfigureCommand
@@ -34,11 +33,6 @@ class ConfigureCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /** @var FormHelper $formHelper */
-        $formHelper = $this->getHelper('form');
-        /** @var FormHelper $formHelper */
-        Format::registerStyles($output);
-
         $envFile = $input->getArgument('envFile');
         $envMetaFile = $input->getArgument('envMetaFile');
 
@@ -50,9 +44,28 @@ class ConfigureCommand extends Command
         }
 
         $meta = Envoi::metaFromYamlFile($envMetaFile);
-        $formData = $formHelper->interactUsingForm(EnvConfigurationType::class, $input, $output, ['meta' => $meta]);
+        $helper = $this->getHelper('question');
 
-        $envData = Envoi::validate($formData, $meta);
+        $envData = [];
+        foreach ($meta as $key => $metadata) {
+            $label = sprintf('%s [%s]: ', $metadata->description, $key);
+            if ($metadata->options) {
+                $question = new ChoiceQuestion(
+                    $label,
+                    $metadata->options,
+                    $metadata->default
+                );
+            } else {
+                $question = new Question($label, $metadata->default);
+            }
+
+            $question->setValidator(function ($answer) use ($key, $metadata) {
+                $answer = Envoi::validateValue($answer, $key, $metadata);
+                return $answer;
+            });
+
+            $envData[$key] = $helper->ask($input, $output, $question);
+        }
 
         $envFileContent = '';
         foreach ($envData as $key => $value) {
