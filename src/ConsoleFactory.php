@@ -2,6 +2,8 @@
 
 namespace Envoi;
 
+use Envoi\Command\MarkdownCommand;
+use Envoi\Command\ValidateCommand;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormRegistry;
@@ -33,7 +35,7 @@ class ConsoleFactory
 {
     public function create(): Application
     {
-        $application = new Application();
+        $application = new Application("Envoi CLI. Environment variables on steroids.", Envoi::VERSION);
 
         $formFactory = Forms::createFormFactory();
         $formRegistry = new FormRegistry([], new ResolvedFormTypeFactory());
@@ -59,6 +61,9 @@ class ConsoleFactory
         $application->getHelperSet()->set($formConsoleHelper);
 
         $application->add(new ConfigureCommand());
+        $application->add(new ValidateCommand());
+        $application->add(new MarkdownCommand());
+
         return $application;
     }
 }

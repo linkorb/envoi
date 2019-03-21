@@ -13,20 +13,11 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Envoi
 {
-    public const DEFAULT_FOLDER = '.';
+    public const VERSION = "1.0.0";
+
     public const DEFAULT_ENV_FILE_NAME = '.env';
     public const DEFAULT_META_FILE_NAME = '.env.yaml';
     public const DEFAULT_MARKDOWN_FILE = 'README.md';
-
-    public static function getDefaultEnvPath()
-    {
-        return self::DEFAULT_FOLDER . DIRECTORY_SEPARATOR . self::DEFAULT_ENV_FILE_NAME;
-    }
-
-    public static function getDefaultMetaPath()
-    {
-        return self::DEFAULT_FOLDER . DIRECTORY_SEPARATOR . self::DEFAULT_META_FILE_NAME;
-    }
 
     /**
      * @param string|null $envPath
@@ -36,7 +27,7 @@ class Envoi
     public static function init(string $envPath = null, string $metaPath = null)
     {
         if (!$envPath) {
-            $envPath = self::getDefaultEnvPath();
+            $envPath = self::DEFAULT_ENV_FILE_NAME;
         }
 
         if (!is_file($envPath)) {
@@ -53,7 +44,7 @@ class Envoi
                 throw new \InvalidArgumentException(sprintf('No meta file "%s"', $metaPath));
             }
         } else {
-            $defaultFilePath =  self::getDefaultMetaPath();
+            $defaultFilePath = self::DEFAULT_META_FILE_NAME;
 
             if (is_file($defaultFilePath)) {
                 $metaPath = $defaultFilePath;
@@ -111,6 +102,49 @@ class Envoi
         return $meta;
     }
 
+
+    /**
+     * @param $value
+     * @param string $key
+     * @param Metadata $metadata
+     * @return bool|string|null
+     * @throws InvalidEnvException
+     */
+    public static function validateValue($value, string $key, Metadata $metadata)
+    {
+        if ($metadata->required && !$value) {
+            throw new InvalidEnvException(sprintf('Env variable "%s" is required', $key));
+        }
+
+        if (!$value) {
+            if ($metadata->default) {
+                $value = $metadata->default;
+            }
+            return $value;
+        }
+
+        if ($metadata->type === Metadata::TYPE_INT && !is_numeric($value)) {
+            throw new InvalidEnvException(sprintf('Env variable "%s" should be int', $key));
+        }
+        if ($metadata->type === Metadata::TYPE_URL && filter_var($value, FILTER_VALIDATE_URL) === false) {
+            throw new InvalidEnvException(sprintf('Env variable "%s" is not valid url', $key));
+        }
+        if ($metadata->type === Metadata::TYPE_PATH) {
+            if (!is_file($value) && !is_dir($value)) {
+                throw new InvalidEnvException(sprintf('Env variable "%s" is not valid path', $key));
+            }
+
+            if ($metadata->makeAbsolutePath) {
+                $value = realpath($value);
+            }
+        }
+        if ($metadata->options && !in_array($value, $metadata->options)) {
+            throw new InvalidEnvException(sprintf('Env variable "%s" is not included in options "%s"', $key, implode($metadata->options, ', ')));
+        }
+
+        return $value;
+    }
+
     /**
      * @param $envVars
      * @param Metadata[] $meta
@@ -121,38 +155,7 @@ class Envoi
     {
         foreach ($meta as $key => $metadata) {
             $value = $envVars[$key] ?? null;
-
-            if ($metadata->required && !$value) {
-                throw new InvalidEnvException(sprintf('Env variable "%s" is required', $key));
-            }
-
-            if (!$value) {
-                if ($metadata->default) {
-                    $value = $metadata->default;
-                    $envVars[$key]  = $value;
-                }
-                continue;
-            }
-
-            if ($metadata->type === Metadata::TYPE_INT && !is_numeric($value)) {
-                throw new InvalidEnvException(sprintf('Env variable "%s" should be int', $key));
-            }
-            if ($metadata->type === Metadata::TYPE_URL && filter_var($value, FILTER_VALIDATE_URL) === false) {
-                throw new InvalidEnvException(sprintf('Env variable "%s" is not valid url', $key));
-            }
-            if ($metadata->type === Metadata::TYPE_PATH) {
-                if (!is_file($value) && !is_dir($value)) {
-                    throw new InvalidEnvException(sprintf('Env variable "%s" is not valid path', $key));
-                }
-
-                if ($metadata->makeAbsolutePath) {
-                    $value = realpath($value);
-                }
-            }
-            if ($metadata->options && !in_array($value, $metadata->options)) {
-                throw new InvalidEnvException(sprintf('Env variable "%s" is not included in options "%s"', $key, implode($metadata->options, ', ')));
-            }
-
+            $value = self::validateValue($value, $key, $metadata);
             $envVars[$key]  = $value;
         }
 

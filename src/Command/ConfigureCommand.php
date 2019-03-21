@@ -8,8 +8,8 @@ use Matthias\SymfonyConsoleForm\Console\Formatter\Format;
 use Matthias\SymfonyConsoleForm\Console\Helper\FormHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -22,8 +22,8 @@ class ConfigureCommand extends Command
     {
         $this->setName('configure');
         $this->setDescription('CLI wizard to ask + update .env file based on .env.yaml');
-        $this->addOption('envFile', null,InputOption::VALUE_OPTIONAL, 'Path to env file for configuration', Envoi::getDefaultEnvPath());
-        $this->addOption('envMetaFile', null,InputOption::VALUE_OPTIONAL, 'Path to meta file for configuration', Envoi::getDefaultMetaPath());
+        $this->addArgument('envFile', InputArgument::OPTIONAL, 'Path to env file for configuration', Envoi::DEFAULT_ENV_FILE_NAME);
+        $this->addArgument('envMetaFile', InputArgument::OPTIONAL, 'Path to meta file for configuration', Envoi::DEFAULT_META_FILE_NAME);
     }
 
     /**
@@ -39,8 +39,8 @@ class ConfigureCommand extends Command
         /** @var FormHelper $formHelper */
         Format::registerStyles($output);
 
-        $envFile = $input->getOption('envFile');
-        $envMetaFile = $input->getOption('envMetaFile');
+        $envFile = $input->getArgument('envFile');
+        $envMetaFile = $input->getArgument('envMetaFile');
 
         if (!is_file($envFile)) {
             throw new InvalidArgumentException(sprintf('Env file "%s" is not existed file', $envFile));
