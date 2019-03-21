@@ -215,7 +215,7 @@ class Envoi
         $variablesContent = join("\n", $variableLines);
 
         $replaceCount = 0;
-        $content = preg_replace("/$startTag\n(([a-zA-Z0-9_,:\-\.\s\n]+\n)?)$endTag/i", "$startTag\n$variablesContent\n$endTag", $content, 1, $replaceCount);
+        $content = preg_replace("/$startTag\n(([a-zA-Z0-9_,:\-\.\${}\s\n]*)?)$endTag/i", "$startTag\n$variablesContent\n$endTag", $content, 1, $replaceCount);
 
         $isUpdated = $replaceCount > 0;
 
