@@ -3,6 +3,8 @@
 namespace Envoi;
 
 
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Dotenv\Dotenv;
 
 use Symfony\Component\Yaml\Yaml;
@@ -189,33 +191,28 @@ class Envoi
         $endTag = '<!-- envoi end -->';
 
 
-        $variableLines = [];
-        foreach ($meta as $key => $item) {
-            $line = "$key is $item->type. $item->description.";
+        $output = new BufferedOutput();
+        $table = new Table($output);
 
-            if ($item->example) {
-                $line .= " Example: $item->example.";
-            }
+        $table->setHeaders(['Variable', 'Type', 'Description', 'Example', 'Default', 'Required', 'Options']);
 
-            if ($item->required) {
-                $line .= " Required.";
-            }
-
-            if ($item->default) {
-                $line .= " Default: $item->default.";
-            }
-
-            if ($item->options) {
-                $line .= " Options: " . join(", ", $item->options) . ".";
-            }
-
-            $variableLines[] = $line;
+        foreach ($meta as $key => $metadata) {
+            $table->addRow([
+                $key,
+                $metadata->type,
+                $metadata->description,
+                $metadata->example,
+                $metadata->default,
+                $metadata->required ? '*' : '',
+                $metadata->options ? join(', ', $metadata->options): ''
+            ]);
         }
 
-        $variablesContent = join("\n", $variableLines);
+        $table->render();
 
+        $variablesContent = $output->fetch();
         $replaceCount = 0;
-        $content = preg_replace("/$startTag\n(([a-zA-Z0-9_,:\-\.\${}\s\n]*)?)$endTag/i", "$startTag\n$variablesContent\n$endTag", $content, 1, $replaceCount);
+        $content = preg_replace("/$startTag\n(([a-zA-Z0-9_,:\-\+\*\|\.\${}\s\n]*)?)$endTag/i", "$startTag\n$variablesContent$endTag", $content, 1, $replaceCount);
 
         $isUpdated = $replaceCount > 0;
 
