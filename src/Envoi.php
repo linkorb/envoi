@@ -16,6 +16,7 @@ class Envoi
     public const DEFAULT_FOLDER = '.';
     public const DEFAULT_ENV_FILE_NAME = '.env';
     public const DEFAULT_META_FILE_NAME = '.env.yaml';
+    public const DEFAULT_MARKDOWN_FILE = 'README.md';
 
     public static function getDefaultEnvPath()
     {
@@ -82,7 +83,7 @@ class Envoi
         $metaContent = Yaml::parseFile($metaPath);
 
         $meta = [];
-        if (!$metaContent) {
+        if (!$metaContent || !is_iterable($metaContent)) {
             return [];
         }
 
@@ -159,8 +160,66 @@ class Envoi
     }
 
 
-    public static function markdown(): string
+    public static function markdown($envMetaPath = self::DEFAULT_META_FILE_NAME, $markdownFile = self::DEFAULT_MARKDOWN_FILE): bool
     {
-        // TODO
+        $meta = self::metaFromYamlFile($envMetaPath);
+
+        if (count($meta) === 0) {
+            return false;
+        }
+
+        if (!is_file($markdownFile)) {
+            throw new \InvalidArgumentException(sprintf('No markdown file %s', $markdownFile));
+        }
+
+        if (!is_readable($markdownFile)) {
+            throw new \InvalidArgumentException(sprintf('Not reachable markdown file %s', $markdownFile));
+        }
+
+        if (!is_writable($markdownFile)) {
+            throw new \InvalidArgumentException(sprintf('Not writable markdown file %s', $markdownFile));
+        }
+
+        $content = file_get_contents($markdownFile);
+
+        $startTag = '<!-- envoi start -->';
+        $endTag = '<!-- envoi end -->';
+
+
+        $variableLines = [];
+        foreach ($meta as $key => $item) {
+            $line = "$key is $item->type. $item->description.";
+
+            if ($item->example) {
+                $line .= " Example: $item->example.";
+            }
+
+            if ($item->required) {
+                $line .= " Required.";
+            }
+
+            if ($item->default) {
+                $line .= " Default: $item->default.";
+            }
+
+            if ($item->options) {
+                $line .= " Options: " . join(", ", $item->options) . ".";
+            }
+
+            $variableLines[] = $line;
+        }
+
+        $variablesContent = join("\n", $variableLines);
+
+        $replaceCount = 0;
+        $content = preg_replace("/$startTag\n(([a-zA-Z0-9_,:\-\.\s\n]+\n)?)$endTag/i", "$startTag\n$variablesContent\n$endTag", $content, 1, $replaceCount);
+
+        $isUpdated = $replaceCount > 0;
+
+        if ($isUpdated) {
+            file_put_contents($markdownFile, $content);
+        }
+
+        return $isUpdated;
     }
 }

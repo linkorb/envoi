@@ -16,9 +16,9 @@ class MarkdownCommand extends Command
 {
     protected function configure()
     {
-        $this->setName('configure');
-        $this->setDescription('CLI wizard to ask + update .env file based on .env.yaml');
-        $this->addOption('envFile', null, InputOption::VALUE_OPTIONAL, 'Path to env file for configuration', Envoi::getDefaultEnvPath());
+        $this->setName('markdown');
+        $this->setDescription('Output a GitHub Flavored Markdown documentation for the available variables');
+        $this->addOption('markdownFile', null, InputOption::VALUE_OPTIONAL, 'Path to markdown file which will be changed', Envoi::DEFAULT_MARKDOWN_FILE);
         $this->addOption('envMetaFile', null, InputOption::VALUE_OPTIONAL, 'Path to meta file for configuration', Envoi::getDefaultMetaPath());
     }
 
@@ -30,9 +30,13 @@ class MarkdownCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $envFile = $input->getOption('envFile');
+        $markdownFile = $input->getOption('markdownFile');
         $envMetaFile = $input->getOption('envMetaFile');
 
-        // TODO
+        if (Envoi::markdown($envMetaFile, $markdownFile)) {
+            $output->writeln(sprintf('<info>File %s was success changed</info>', $markdownFile));
+        } else {
+            $output->writeln(sprintf('<warn>File %s have not envoi tags</warn>', $markdownFile));
+        }
     }
 }
