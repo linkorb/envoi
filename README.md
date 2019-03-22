@@ -38,6 +38,11 @@ BAR:
   options: RED,GREEN,BLUE # validates that input is one of the available options
 ```
 
+```php
+Envoi::init();
+getenv('FOO')
+```
+
 #### CLI
 
     ./vendor/bin/envoi
