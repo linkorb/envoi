@@ -54,8 +54,9 @@ Available commands:
 `validate`   Validate based on meta file `.env.yaml`.<br/>
 `configure`  CLI wizard to ask + update .env file based on `.env.yaml`.<br/>
 `markdown`   Output a GitHub Flavored Markdown documentation for the available variables.
+Look for a `<!-- envoi start -->` and `<!-- envoi end -->` tags in file (default to README.md), and insert/update the generated markdown between those tags.
 
 
-Run tests
+##### Run tests
     
     ./vendor/bin/phpunit --bootstrap vendor/autoload.php tests
