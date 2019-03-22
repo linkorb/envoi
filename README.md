@@ -44,9 +44,9 @@ BAR:
     
 Available commands:
 
-`validate`   Validate based on meta file `.env.yaml`.
+`validate`   Validate based on meta file `.env.yaml`.<br/>
 `configure`  CLI wizard to ask + update .env file based on `.env.yaml`.<br/>
-`markdown`   Output a GitHub Flavored Markdown documentation for the available variables.<br/>
+`markdown`   Output a GitHub Flavored Markdown documentation for the available variables.
 
 
 Run tests
