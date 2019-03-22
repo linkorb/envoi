@@ -38,9 +38,11 @@ BAR:
   options: RED,GREEN,BLUE # validates that input is one of the available options
 ```
 
+Init environment variables from `.env`
+
 ```php
 Envoi::init();
-getenv('FOO')
+$foo = getenv('FOO');
 ```
 
 #### CLI
