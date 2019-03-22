@@ -14,7 +14,7 @@ Library to make environment variables more powerful
 Assign one variable based on another in `.env` file
 
 ```
-FOO="{BAR}" 
+FOO="foo" 
 BAR="{FOO}/logs"
 ```
 
