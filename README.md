@@ -10,7 +10,7 @@ Library to make environment variables more powerful
 
 ### Use
 
-####Interpolation
+#### Interpolation
 Assign one variable based on another in `.env` file
 
 ```
@@ -44,8 +44,8 @@ BAR:
     
 Available commands:
 
-`configure`  CLI wizard to ask + update .env file based on `.env.yaml`.
-`markdown`   Output a GitHub Flavored Markdown documentation for the available variables.
+`configure`  CLI wizard to ask + update .env file based on `.env.yaml`.&nbsp;
+`markdown`   Output a GitHub Flavored Markdown documentation for the available variables.&nbsp;
 `validate`   Validate based on meta file `.env.yaml`.
 
 Run tests
