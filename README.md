@@ -24,17 +24,17 @@ Supports types: `int`, `string`, `url`, `path`
 ```yaml
 FOO:
   description: Used to configure foo system
-  type: string
-  example: "some example value"
+  type: url
+  default: "https://username:password@example.com/bla"
   required: true
 QUX:
   description: path to qux files
   type: path
+  example: "some example value"
   make-absolute-path: true  #  "Expands  relative paths to absolute paths (i.e. ~/qux becomes /home/joe/qux)
 BAR:
   description: Used for bar things
-  type: url
-  default: "https://username:password@example.com/bla"
+  type: string
   options: RED,GREEN,BLUE # validates that input is one of the available options
 ```
 
