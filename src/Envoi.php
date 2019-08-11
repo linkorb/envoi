@@ -15,7 +15,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Envoi
 {
-    public const VERSION = "1.0.0";
+    public const VERSION = "1.1.1";
 
     public const DEFAULT_ENV_FILE_NAME = '.env';
     public const DEFAULT_META_FILE_NAME = '.env.yaml';
