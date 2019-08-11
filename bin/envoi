@@ -1,5 +1,7 @@
 #!/usr/bin/env php
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 $possibleAutoloadPaths = [
      // local dev repository
@@ -14,5 +16,4 @@ foreach ($possibleAutoloadPaths as $possibleAutoloadPath) {
     }
 }
 
-require $autoload;
 \Envoi\ConsoleFactory::create()->run();
