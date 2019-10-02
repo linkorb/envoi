@@ -24,9 +24,10 @@ class Envoi
     /**
      * @param string|null $envPath
      * @param string|null $metaPath
+     * @param bool|true   $usePutenv
      * @throws InvalidEnvException
      */
-    public static function init(string $envPath = null, string $metaPath = null)
+    public static function init(string $envPath = null, string $metaPath = null, $usePutenv = true)
     {
         if (!$envPath) {
             $envPath = self::DEFAULT_ENV_FILE_NAME;
@@ -53,7 +54,7 @@ class Envoi
             }
         }
 
-        $dotenv = new Dotenv();
+        $dotenv = new Dotenv($usePutenv);
         if ($metaPath) {
             $meta = self::metaFromYamlFile($metaPath);
             $envContent = file_get_contents($envPath);
