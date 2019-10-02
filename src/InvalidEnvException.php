@@ -8,5 +8,4 @@ namespace Envoi;
  */
 class InvalidEnvException extends \Exception
 {
-
 }

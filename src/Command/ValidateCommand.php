@@ -61,5 +61,4 @@ class ValidateCommand extends Command
             }
         }
     }
-
 }

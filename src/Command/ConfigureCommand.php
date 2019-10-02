@@ -84,5 +84,4 @@ class ConfigureCommand extends Command
             throw new InvalidArgumentException(sprintf('Error happens while write to "%s" file', $envFile));
         }
     }
-
 }

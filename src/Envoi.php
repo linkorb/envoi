@@ -2,7 +2,6 @@
 
 namespace Envoi;
 
-
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Dotenv\Dotenv;
@@ -40,7 +39,6 @@ class Envoi
         if (!is_readable($envPath)) {
             throw new \InvalidArgumentException(sprintf('Env file "%s" is not readable', $envPath));
         }
-
 
         if ($metaPath) {
             if (!is_file($metaPath)) {
@@ -105,7 +103,6 @@ class Envoi
         return $meta;
     }
 
-
     /**
      * @param $value
      * @param string $key
@@ -165,7 +162,6 @@ class Envoi
         return $envVars;
     }
 
-
     public static function markdown($envMetaPath = self::DEFAULT_META_FILE_NAME, $markdownFile = self::DEFAULT_MARKDOWN_FILE): bool
     {
         $meta = self::metaFromYamlFile($envMetaPath);
@@ -190,7 +186,6 @@ class Envoi
 
         $startTag = '<!-- envoi start -->';
         $endTag = '<!-- envoi end -->';
-
 
         $output = new BufferedOutput();
         $table = new Table($output);
