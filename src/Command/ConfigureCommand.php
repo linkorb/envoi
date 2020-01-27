@@ -36,10 +36,13 @@ class ConfigureCommand extends Command
         $envFile = $input->getArgument('envFile');
         $envMetaFile = $input->getArgument('envMetaFile');
 
-        if (!is_file($envFile)) {
-            throw new InvalidArgumentException(sprintf('Env file "%s" is not existed file', $envFile));
+        if (!is_file($envMetaFile)) {
+            throw new InvalidArgumentException(sprintf('Env meta file "%s" is not existed file', $envMetaFile));
         }
-        if (!is_writable($envFile)) {
+        if (!is_readable($envMetaFile)) {
+            throw new InvalidArgumentException(sprintf('Env meta file "%s" is not readable file', $envMetaFile));
+        }
+        if (is_file($envFile) && !is_writable($envFile)) {
             throw new InvalidArgumentException(sprintf('Env file "%s" is not writable file', $envFile));
         }
 
@@ -60,6 +63,9 @@ class ConfigureCommand extends Command
             }
 
             $question->setValidator(function ($answer) use ($key, $metadata) {
+                if (is_numeric($answer) && $metadata->options) {
+                    $answer = $metadata->options[$answer];
+                }
                 $answer = Envoi::validateValue($answer, $key, $metadata);
                 return $answer;
             });
@@ -78,5 +84,4 @@ class ConfigureCommand extends Command
             throw new InvalidArgumentException(sprintf('Error happens while write to "%s" file', $envFile));
         }
     }
-
 }
