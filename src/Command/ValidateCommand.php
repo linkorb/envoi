@@ -53,12 +53,13 @@ class ValidateCommand extends Command
             $envVars[$key]  = $value;
         }
 
-        if (count($errors) === 0) {
-            $output->writeln(sprintf('<info>Env file %s is valid</info>', $envFile));
-        } else {
+        if (count($errors) > 0) {
             foreach ($errors as $error) {
                 $output->writeln(sprintf('<error>%s</error>', $error));
             }
+            return -1;
         }
+        $output->writeln(sprintf('<info>Env file %s is valid</info>', $envFile));
+        return 0;
     }
 }

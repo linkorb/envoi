@@ -16,7 +16,7 @@ use Symfony\Component\Console\Helper\QuestionHelper;
  */
 class ConsoleFactory
 {
-    public function create(): Application
+    public static function create(): Application
     {
         $application = new Application("Envoi CLI. Environment variables on steroids.", Envoi::VERSION);
 
