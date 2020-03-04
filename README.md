@@ -1,8 +1,19 @@
 Envoi
 =====
-Environment variables on steroids
 
-Library to make environment variables more powerful
+Envoi aims to ease the use and documentation of environment variables (env
+vars) in PHP applications.
+
+Envoi features:
+
+- a Yaml schema to describe the env vars that may be used to configure an
+  application
+
+- tools to validate env vars against a schema
+
+- a tool to assist in the population of a `.env` file
+
+- a tool which converts a schema to markdown
 
 ### Install
 
@@ -11,6 +22,7 @@ Library to make environment variables more powerful
 ### Use
 
 #### Interpolation
+
 Assign one variable based on another in `.env` file
 
 ```
@@ -57,6 +69,6 @@ Available commands:
 Look for a `<!-- envoi start -->` and `<!-- envoi end -->` tags in file (default to README.md), and insert/update the generated markdown between those tags.
 
 
-##### Run tests
+### Run tests
     
     ./vendor/bin/phpunit --bootstrap vendor/autoload.php tests
