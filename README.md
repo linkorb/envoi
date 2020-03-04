@@ -71,4 +71,4 @@ Look for a `<!-- envoi start -->` and `<!-- envoi end -->` tags in file (default
 
 ### Run tests
     
-    ./vendor/bin/phpunit --bootstrap vendor/autoload.php tests
+    ./vendor/bin/phpunit
