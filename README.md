@@ -1,8 +1,24 @@
 Envoi
 =====
-Environment variables on steroids
 
-Library to make environment variables more powerful
+Envoi aims to ease the use and documentation of environment variables (env
+vars) in PHP applications.
+
+Envoi features:
+
+- a Yaml schema to describe the env vars that may be used to configure an
+  application
+
+- tools to validate env vars against a schema
+
+- a tool to assist in the population of a `.env` file
+
+- a tool which converts a schema to markdown
+
+Envoi sports a console command which validates a `.env` file against a schema
+(by convention, `.env.yaml`).  It also provides checkers that, when invoked
+early in the start-up phase of an application, will halt an application which
+doesn't have a complete and valid set of env vars.
 
 ### Install
 
@@ -10,7 +26,40 @@ Library to make environment variables more powerful
 
 ### Use
 
+#### Env Checkers
+
+A checker should be invoked as early as possible in the life-cycle of an
+application.  The ideal time is immediately after the environment has been
+populated with env vars.  For example, in a Symfony-based app, the checker
+should be invoked right after the Dotenv component has loaded the env vars from
+the various `.env*` files:
+
+```
+<?php
+
+// config/bootstrap.php
+
+use Envoi\EnvChecker;
+use Symfony\Component\Dotenv\Dotenv;
+
+require dirname(__DIR__).'/vendor/autoload.php';
+
+(new Dotenv(false))->loadEnv(dirname(__DIR__).'/.env');
+// check the env!
+(new EnvChecker())->check(dirname(__DIR__).'/.env.yaml');
+```
+
+The checker will throw an exception to halt the application when invalid env
+vars are found.  The list of validation errors is included in the exception
+message.
+
+`EnvChecker` treats the environment as immutable: it validates env vars, but
+does not modify them.  `MutableEnvChecker` validates env vars and can also
+transform values, making it the ideal checker when you want to take advantage
+of the various env var transformation features of Envoi.
+
 #### Interpolation
+
 Assign one variable based on another in `.env` file
 
 ```
@@ -57,6 +106,6 @@ Available commands:
 Look for a `<!-- envoi start -->` and `<!-- envoi end -->` tags in file (default to README.md), and insert/update the generated markdown between those tags.
 
 
-##### Run tests
+### Run tests
     
-    ./vendor/bin/phpunit --bootstrap vendor/autoload.php tests
+    ./vendor/bin/phpunit
