@@ -23,7 +23,7 @@ class EnvChecker
         // check that required vars are set and that set vars are valid
         foreach ($meta as $varname => $metadata) {
             try {
-                $this->validate($varname, $_ENV[$varname], $metadata);
+                $this->validate($varname, $_ENV[$varname] ?? '', $metadata);
             } catch (InvalidEnvException $e) {
                 $errors[] = $e->getMessage();
             }
