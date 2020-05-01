@@ -33,10 +33,28 @@ class MarkdownCommand extends Command
         $markdownFile = $input->getArgument('markdownFile');
         $envMetaFile = $input->getArgument('envMetaFile');
 
-        if (Envoi::markdown($envMetaFile, $markdownFile)) {
-            $output->writeln(sprintf('<info>File %s was success changed</info>', $markdownFile));
-        } else {
-            $output->writeln(sprintf('<error>File %s have not envoi tags</error>', $markdownFile));
+        $docWasWritten = false;
+
+        try {
+            $docWasWritten = Envoi::markdown($envMetaFile, $markdownFile);
+        } catch (\UnexpectedValueException $e) {
+            $output->writeln("<comment>There wasn't any Env Var Metadata to document in the meta file \"{$envMetaFile}\".</comment>");
+
+            return -1;
+        } catch (\InvalidArgumentException $e) {
+            $output->writeln("<error>The path to the markdownFile \"{$markdownFile}\" is not valid: \"{$e->getMessage()}\".</error>");
+
+            return -1;
         }
+
+        if (!$docWasWritten) {
+            $output->writeln("<error>The Env Var documentation was not written to the markdownFile \"{$markdownFile}\".  Please check that the file contains the required Envoi tags.</error>");
+
+            return -1;
+        }
+
+        $output->writeln("<info>The Env Var documentation was successfully written to \"{$markdownFile}\".</info>");
+
+        return 0;
     }
 }

@@ -167,7 +167,7 @@ class Envoi
         $meta = self::metaFromYamlFile($envMetaPath);
 
         if (count($meta) === 0) {
-            return false;
+            throw new \UnexpectedValueException("Expected there to be metadata in the meta file \"{$envMetaPath}\", but found none.");
         }
 
         if (!is_file($markdownFile)) {
