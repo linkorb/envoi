@@ -33,9 +33,7 @@ class EnvChecker
             $errors[] = "{$varname} is undocumented";
         }
 
-        if (sizeof($errors)) {
-            throw new InvalidEnvException(implode('; ', $errors));
-        }
+        $this->complain($errors);
     }
 
     protected function loadMeta($path): array
@@ -62,5 +60,14 @@ class EnvChecker
             ),
             $meta
         );
+    }
+
+    protected function complain(array $errors): void
+    {
+        if (0 === sizeof($errors)) {
+            return;
+        }
+
+        throw new InvalidEnvException(implode('; ', $errors));
     }
 }
