@@ -3,7 +3,7 @@
 namespace Envoi;
 
 /**
- * MutableEnvChecker checks the validity of environment variables.
+ * EnvChecker checks the validity of environment variables.
  */
 class EnvChecker
 {
