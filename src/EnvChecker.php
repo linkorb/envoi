@@ -68,6 +68,35 @@ class EnvChecker
             return;
         }
 
+        $this->registerExceptionHandler();
+
         throw new InvalidEnvException(implode('; ', $errors));
+    }
+
+    protected function registerExceptionHandler()
+    {
+        if ('cli' === php_sapi_name() || ini_get('display_errors')) {
+            return;
+        }
+
+        $originalExceptionHandler = set_exception_handler(
+            static function (\Throwable $e) {
+                if (!$e instanceof InvalidEnvException) {
+                    return;
+                }
+
+                ob_start();
+                echo '<html><body><h1>Envoi validation failed</h1></body></html>';
+                ob_end_flush();
+
+                // this seems to be what the default handler does
+                $exceptionName = get_class($e);
+                trigger_error("Uncaught {$exceptionName}: {$e->getMessage()}", E_USER_ERROR);
+            }
+        );
+
+        if (null !== $originalExceptionHandler) {
+            restore_exception_handler();
+        }
     }
 }
