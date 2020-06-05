@@ -37,9 +37,7 @@ class MutableEnvChecker extends EnvChecker
             $errors[] = "{$varname} is undocumented";
         }
 
-        if (sizeof($errors)) {
-            throw new InvalidEnvException(implode('; ', $errors));
-        }
+        $this->complain($errors);
 
         foreach ($replacements as $varname => $value) {
             $_ENV[$varname] = $value;
