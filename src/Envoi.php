@@ -51,18 +51,9 @@ class Envoi
                 $metaPath = $defaultFilePath;
             }
         }
-
-        $dotenv = new Dotenv($usePutenv);
+        (new Dotenv($usePutenv))->loadEnv($envPath);
         if ($metaPath) {
-            $meta = self::metaFromYamlFile($metaPath);
-            $envContent = file_get_contents($envPath);
-            $envVars = $dotenv->parse($envContent);
-
-            $envVars = self::validate($envVars, $meta);
-
-            $dotenv->populate($envVars);
-        } else {
-            $dotenv->load($envPath);
+            (new EnvChecker())->check($metaPath);
         }
     }
 
