@@ -25,7 +25,7 @@ class ConsoleFactory
         $application->getHelperSet()->set(new QuestionHelper());
 
         $application->add(new ConfigureCommand());
-        $application->add(new ValidateCommand());
+        $application->add(new ValidateCommand(new EnvChecker()));
         $application->add(new MarkdownCommand());
 
         return $application;

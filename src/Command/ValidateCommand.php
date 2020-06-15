@@ -2,6 +2,7 @@
 
 namespace Envoi\Command;
 
+use Envoi\EnvChecker;
 use Envoi\Envoi;
 use Envoi\InvalidEnvException;
 use Symfony\Component\Console\Command\Command;
@@ -16,6 +17,15 @@ use Symfony\Component\Dotenv\Dotenv;
  */
 class ValidateCommand extends Command
 {
+    private $envChecker;
+
+    public function __construct(EnvChecker $envChecker, string $name = null)
+    {
+        $this->envChecker = $envChecker;
+
+        parent::__construct($name);
+    }
+
     protected function configure()
     {
         $this->setName('validate');
@@ -34,32 +44,27 @@ class ValidateCommand extends Command
         $envFile = $input->getArgument('envFile');
         $envMetaFile = $input->getArgument('envMetaFile');
 
-        $envContent = file_get_contents($envFile);
-        $dotenv = new Dotenv();
-        $envVars = $dotenv->parse($envContent);
-
-
-        $meta =  Envoi::metaFromYamlFile($envMetaFile);
-
-        $errors = [];
-        foreach ($meta as $key => $metadata) {
-            $value = $envVars[$key] ?? null;
-            try {
-                $value = Envoi::validateValue($value, $key, $metadata);
-            } catch (InvalidEnvException $e) {
-                $errors[] = $e->getMessage();
-                continue;
-            }
-            $envVars[$key]  = $value;
+        if (method_exists(Dotenv::class, 'usePutenv')) {
+            $dotenv = new Dotenv();
+        } else {
+            // this version of Dotenv still uses the $putenv constructer arg
+            $dotenv = new Dotenv(false);
         }
 
-        if (count($errors) > 0) {
-            foreach ($errors as $error) {
+        $dotenv->loadEnv($envFile);
+
+        try {
+            $this->envChecker->check($envMetaFile);
+        } catch (InvalidEnvException $e) {
+            foreach (explode('; ', $e->getMessage()) as $error) {
                 $output->writeln(sprintf('<error>%s</error>', $error));
             }
+
             return -1;
         }
+
         $output->writeln(sprintf('<info>Env file %s is valid</info>', $envFile));
+
         return 0;
     }
 }
