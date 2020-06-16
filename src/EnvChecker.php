@@ -23,7 +23,7 @@ class EnvChecker
         // check that required vars are set and that set vars are valid
         foreach ($meta as $varname => $metadata) {
             try {
-                $this->validate($varname, $_ENV[$varname] ?? '', $metadata);
+                $this->validate($varname, ($_SERVER[$varname] ?? ($_ENV[$varname] ?? '')), $metadata);
             } catch (InvalidEnvException $e) {
                 $errors[] = $e->getMessage();
             }
@@ -48,18 +48,31 @@ class EnvChecker
 
     protected function checkUndocumented(array $meta): array
     {
-        if (!class_exists('\Symfony\Component\Dotenv\Dotenv')
-            || !isset($_ENV['SYMFONY_DOTENV_VARS'])
-        ) {
+        if (!class_exists('\Symfony\Component\Dotenv\Dotenv')) {
             return [];
         }
 
-        return array_diff_key(
-            array_flip(
-                explode(',', $_ENV['SYMFONY_DOTENV_VARS'])
-            ),
-            $meta
-        );
+        $undocumented = [];
+
+        if (isset($_SERVER['SYMFONY_DOTENV_VARS'])) {
+            $undocumented += array_diff_key(
+                array_flip(
+                    explode(',', $_SERVER['SYMFONY_DOTENV_VARS'])
+                ),
+                $meta
+            );
+        }
+
+        if (isset($_ENV['SYMFONY_DOTENV_VARS'])) {
+            $undocumented += array_diff_key(
+                array_flip(
+                    explode(',', $_ENV['SYMFONY_DOTENV_VARS'])
+                ),
+                $meta
+            );
+        }
+
+        return $undocumented;
     }
 
     protected function complain(array $errors): void
