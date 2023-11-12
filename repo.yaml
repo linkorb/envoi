@@ -1,0 +1,10 @@
+codeowners:
+- owners:
+  - '@joostfaassen'
+  pattern: '*'
+description: ''
+license: mit
+name: envoi
+readme:
+  enable_generation: false
+type: other
