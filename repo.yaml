@@ -2,9 +2,12 @@ codeowners:
 - owners:
   - '@joostfaassen'
   pattern: '*'
-description: ''
+description: 'Envoi: Environment variables on steroids'
 license: mit
+license_year: 2019
 name: envoi
-readme:
-  enable_generation: false
 type: other
+visibility: public
+github:
+  features:
+    issues: true
