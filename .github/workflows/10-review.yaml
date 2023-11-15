@@ -1,0 +1,65 @@
+# {{ repo_managed }}
+name: ReviewCode
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  pull_request:
+    branches: [master, main]
+    types: [opened, edited, reopened, synchronize]
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  check-for-cc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # interesting alternative: https://github.com/cocogitto/cocogitto
+      - name: Conventional commit checker
+        uses: webiny/action-conventional-commits@v1.1.0
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+
+      #- name: Extra conventional commits check
+      #  uses: gsactions/commit-message-checker@v2
+      #  with:
+      #    pattern: '^(feat|fix|test|docs|chore|style|refactor|ci|cd):'
+      #    error: 'You need to start with a conventional commits action.'
+
+      - name: Check Card# reference
+        uses: gsactions/commit-message-checker@v2
+        with:
+          # Matches lines that end in a card number:                  #1234
+          # Matches lines that end in a card number and PR reference: #1234 (#20)
+          pattern: '#\d{4}(\s+\(#\d+\))?'
+          flags: 'gm'
+          error: 'Your commit message has to end with a card number like "#1234".'
+          excludeDescription: 'true' # optional: this excludes the description body of a pull request
+          excludeTitle: 'true' # optional: this excludes the title of a pull request
+          checkAllCommitMessages: 'true' # optional: this checks all commits associated with a pull request
+          accessToken: ${{ secrets.GITHUB_TOKEN }} # github access token is only required if checkAllCommitMessages is true
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+
+      - name: Check Line Length
+        uses: gsactions/commit-message-checker@v2
+        with:
+          pattern: '^.{0,50}$'
+          error: 'The maximum line length of 50 characters is exceeded.'
+          excludeDescription: 'true' # optional: this excludes the description body of a pull request
+          excludeTitle: 'true' # optional: this excludes the title of a pull request
+          checkAllCommitMessages: 'true' # optional: this checks all commits associated with a pull request
+          accessToken: ${{ secrets.GITHUB_TOKEN }} # github access token is only required if checkAllCommitMessages is true
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+
+      - name: Check Body Length
+        uses: gsactions/commit-message-checker@v2
+        with:
+          pattern: '^.{0,72}$'
+          error: 'The maximum line length of 72 characters is exceeded in the body.'
+          excludeDescription: 'false' # optional: this excludes the description body of a pull request
+          excludeTitle: 'true' # optional: this excludes the title of a pull request
+          checkAllCommitMessages: 'true' # optional: this checks all commits associated with a pull request
+          accessToken: ${{ secrets.GITHUB_TOKEN }} # github access token is only required if checkAllCommitMessages is true
+        if: ${{ github.event_name != 'workflow_dispatch' }}

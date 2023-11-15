@@ -1,0 +1,49 @@
+# Managed by https://github.com/linkorb/repo-ansible. Manual changes will be overwritten.
+ruleset:
+  syntax:
+    enabled: true
+    severity: error
+
+  tags:
+    enabled: true
+    severity: warning
+
+  empty-block:
+    enabled: true
+    severity: error
+
+  deprecated-function:
+    enabled: true
+    severity: warning
+
+  deprecated-filter:
+    enabled: true
+    severity: warning
+
+  deprecated-test:
+    enabled: true
+    severity: warning
+
+  deprecated-operator:
+    enabled: true
+    severity: warning
+
+  missing-space:
+    enabled: true
+    severity: error
+
+  trailing-space:
+    enabled: true
+    severity: error
+
+  strict-variable:
+    enabled: true
+    severity: error
+
+  ternary:
+    enabled: true
+    severity: error
+
+  not-operator:
+    enabled: true
+    severity: error

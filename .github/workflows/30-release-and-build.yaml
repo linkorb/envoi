@@ -1,0 +1,106 @@
+# {{ repo_managed }}
+name: Release
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: GitHub Environment Variables Action
+      uses: FranzDiebold/github-env-vars-action@v2
+
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: write semantic-release config
+      uses: DamianReeves/write-file-action@v1.2
+      with:
+        path: package.json
+        contents: |
+          {
+            "name": "linkorb-releases",
+            "version": "1.0.0",
+            "description": "Dependencies for the LinkORB release workflow",
+            "main": "index.js",
+            "scripts": {
+              "test": "echo \"Error: no test specified\" && exit 1"
+            },
+            "author": "",
+            "license": "ISC",
+            "devDependencies": {
+              "@codedependant/semantic-release-docker": "^4.1.0",
+              "@semantic-release-plus/docker": "^3.1.2",
+              "@semantic-release/changelog": "^6.0.1",
+              "@semantic-release/exec": "^6.0.3",
+              "@semantic-release/git": "^10.0.1"
+            }
+          }
+        write-mode: overwrite
+
+    - name: write semantic-release config
+      uses: DamianReeves/write-file-action@v1.2
+      with:
+        path: .releaserc
+        contents: |
+          {
+            "branches": ["master", "main" ],
+            "debug": "True",
+            "repositoryUrl": 'git+https://github.com/linkorb/REPOPLACEHOLDER.git',
+            "plugins": [
+                "@semantic-release/commit-analyzer",
+                "@semantic-release/github",
+                "@semantic-release/release-notes-generator",
+                [
+                  "@semantic-release/npm",
+                      {
+                        "npmPublish": false
+                      }
+                ],
+                "@semantic-release/changelog",
+                [
+                    "@semantic-release/git",
+                    {
+                        "assets": [
+                            "CHANGELOG.md"
+                        ],
+                        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+                    }
+                ],
+                ["@semantic-release/exec", {
+                    "prepareCmd": "echo ${ process.env.DOCKER_PASSWORD } | docker login ghcr.io --username automation@linkorb.com --password-stdin",
+                    "publishCmd": "git checkout package.json; git checkout package-lock.json; docker build . --build-arg PACKAGIST_USER='token'
+                                      --build-arg PACKAGIST_TOKEN=${ process.env.PACKAGIST_TOKEN}
+                                     --label org.opencontainers.image.source=https://github.com/linkorb/${ process.env.CI_REPOSITORY_NAME}
+                                     --tag ghcr.io/linkorb/${ process.env.CI_REPOSITORY_NAME }:${nextRelease.version} --file Dockerfile &&
+                                   docker push ghcr.io/linkorb/${ process.env.CI_REPOSITORY_NAME }:${nextRelease.version} &&
+                                   docker tag ghcr.io/linkorb/${ process.env.CI_REPOSITORY_NAME }:${nextRelease.version} ghcr.io/linkorb/${ process.env.CI_REPOSITORY_NAME }:latest &&
+                                   docker push ghcr.io/linkorb/${ process.env.CI_REPOSITORY_NAME }:latest"
+                }]
+             ]
+          }
+        write-mode: overwrite
+
+
+    - name: Set repo name in .releaserc
+      run: "sed -i s/REPOPLACEHOLDER/${{ env.CI_REPOSITORY_NAME }}/ .releaserc"
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 'lts/*'
+
+    - name: Install dependencies for release
+      run: npm install
+
+    - name: Create release and push container image
+      run: npx semantic-release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_TOKEN }}
+        CI_REPOSITORY_NAME: ${{ env.CI_REPOSITORY_NAME }}

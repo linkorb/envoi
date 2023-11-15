@@ -1,0 +1,28 @@
+# {{ repo_managed }}
+name: Cleanup
+
+on:
+  schedule:
+  - cron: 0 13 * * 2
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: GitHub Environment Variables Action
+      uses: FranzDiebold/github-env-vars-action@v2
+
+    - name: Delete old unused container images
+      uses: snok/container-retention-policy@v2
+      with:
+        image-names: "${{ env.CI_REPOSITORY_NAME }}"
+        cut-off: A month ago UTC
+        account-type: org
+        org-name: linkorb
+        keep-at-least: 5
+        skip-tags: latest
+        untagged-only: false
+        token: ${{ secrets.DOCKER_PASSWORD }}

@@ -1,0 +1,27 @@
+# .reviewdog.yml
+# Managed by https://github.com/linkorb/repo-ansible. Manual changes will be overwritten.
+# Configure the tools
+runner:
+  phpstan:
+    cmd: phpstan analyze --configuration=phpstan.neon --error-format=checkstyle --memory-limit=-1
+    format: checkstyle # format to be parsed by reviewdog
+    name: phpstan # output in logs
+    level: error
+
+  php-cs-fixer:
+    name: php-cs-fixer
+    cmd: php-cs-fixer fix --dry-run --diff .php-cs-fixer.dist.php --ansi --format checkstyle
+    format: checkstyle
+    level: error
+
+  yamllint:
+    name: yamllint
+    cmd: yamllint -c .yamllint.yaml . --format "parsable"
+    errorformat:
+      - "%f:%l:%c: %m"
+    level: error
+
+  twigcs:
+    cmd: "twigcs **/*.twig --reporter checkstyle"
+    format: checkstyle
+    level: "warning"
