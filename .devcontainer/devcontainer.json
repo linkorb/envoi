@@ -45,10 +45,6 @@
       "description": "GitHub Personal Access Token (classic) with package read access, required for docker base image",
       "documentationUrl": "https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-with-a-personal-access-token-classic"
     }
-    ,"PACKAGIST_TOKEN": {
-      "description": "Packagist access token, required for installation of composer packages from private packagist",
-      "documentationUrl": "https://packagist.com/orgs/linkorb"
-    }
   },
 
   "initializeCommand": "echo $CR_PAT | docker login ghcr.io -u $GITHUB_USER --password-stdin",

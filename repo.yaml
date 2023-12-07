@@ -11,3 +11,6 @@ visibility: public
 github:
   features:
     issues: true
+
+devcontainer:
+  private_packagist: false
