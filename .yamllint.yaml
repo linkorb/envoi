@@ -1,0 +1,20 @@
+# Managed by https://github.com/linkorb/repo-ansible. Manual changes will be overwritten.
+extends: default
+
+rules:
+  # Rule to enforce indentation with 2 spaces
+  indentation:
+    spaces: 2
+
+  # Rule to enforce line length limit of 80 characters
+  line-length:
+    max: 120
+
+  # Rule to enforce key ordering in alphabetical order
+  key-ordering: disable
+
+  # Rule to check for trailing spaces at the end of lines
+  trailing-spaces: enable
+
+  # Rule to check for consistent newlines at the end of files
+  new-lines: enable

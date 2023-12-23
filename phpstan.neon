@@ -1,0 +1,6 @@
+# Managed by https://github.com/linkorb/repo-ansible. Manual changes will be overwritten.
+
+parameters:
+  level: 0
+  paths:
+  - src

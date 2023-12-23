@@ -1,0 +1,16 @@
+codeowners:
+- owners:
+  - '@joostfaassen'
+  pattern: '*'
+description: 'Envoi: Environment variables on steroids'
+license: mit
+license_year: 2019
+name: envoi
+type: library
+visibility: public
+github:
+  features:
+    issues: true
+
+devcontainer:
+  private_packagist: false

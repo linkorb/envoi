@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+
+temporary_file=$(mktemp)
+composer-unused --no-progress --output-format=github > $temporary_file
+exit_code=$?
+
+cat $temporary_file | grep -v 'ignored'
+exit $exit_code
