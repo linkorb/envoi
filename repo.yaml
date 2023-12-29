@@ -9,6 +9,7 @@ name: envoi
 type: library
 visibility: public
 github:
+  default_branch: master
   features:
     issues: true
 
