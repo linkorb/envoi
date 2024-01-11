@@ -1,4 +1,4 @@
-# See https://engineering.linkorb.com/topics/github-codespaces/articles/commit-standards for more information
+# See https://engineering.linkorb.com/topics/git/articles/commit-standards/ for more information
 #
 # Write a 50-character or less commit header below
 # It should take the form: <type>[scope]: <description> #<cardNumber>
