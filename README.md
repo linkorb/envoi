@@ -21,7 +21,6 @@ Envoi sports a console command which validates a `.env` file against a schema
 early in the start-up phase of an application, will halt an application which
 doesn't have a complete and valid set of env vars.
 
-Build status: [![Release](https://github.com/linkorb/envoi/actions/workflows/30-release-and-build.yaml/badge.svg)](https://github.com/linkorb/envoi/actions/workflows/30-release-and-build.yaml)
 
 
 ### Install
