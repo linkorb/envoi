@@ -6,7 +6,7 @@ description: 'Envoi: Environment variables on steroids'
 license: mit
 license_year: 2019
 name: envoi
-type: library
+type: php-cli
 visibility: public
 github:
   default_branch: master
