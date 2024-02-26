@@ -26,10 +26,8 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
     && sudo chsh -s /bin/bash vscode
 
-COPY --chown=vscode:vscode ../. /app
-RUN chown vscode:vscode -R /app /var/log/apache2
+RUN chown vscode:vscode -R /var/log/apache2
 
 RUN echo "xdebug.mode=off" | tee '/usr/local/etc/php/conf.d/xdebug.ini'
 
 WORKDIR /app
-USER root

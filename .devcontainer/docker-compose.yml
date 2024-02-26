@@ -11,7 +11,7 @@ services:
         NODE_VERSION: "lts/*"
 
     volumes:
-      - ..:/workspace:cached
+      - ..:/app:cached
 
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
     network_mode: service:db
@@ -28,13 +28,24 @@ services:
     volumes:
       - mariadb-data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: mariadb
-      MYSQL_DATABASE: mariadb
-      MYSQL_USER: mariadb
-      MYSQL_PASSWORD: mariadb
+      MARIADB_DATABASE: app
+      MARIADB_USER: mariadb
+      MARIADB_PASSWORD: mariadb
+      MARIADB_ROOT_PASSWORD: mariadb
 
     # Add "forwardPorts": ["3306"] to **devcontainer.json** to forward MariaDB locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
+
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_USER: mariadb
+      PMA_PASSWORD: mariadb
+      APACHE_PORT: 8000
+    network_mode: service:db
 
 volumes:
   mariadb-data:
