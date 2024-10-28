@@ -7,8 +7,6 @@ sudo rm /usr/lib/python3.*/EXTERNALLY-MANAGED || true
 
 git config commit.template .devcontainer/git/linkorb_commit.template
 
-cp .devcontainer/git/hooks/pre-push .git/hooks/pre-push
-chmod +x .git/hooks/pre-push
 
 
 composer install
