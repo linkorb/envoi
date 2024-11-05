@@ -1,6 +1,4 @@
 # Managed by https://github.com/linkorb/repo-ansible. Manual changes will be overwritten.
-version: '3.8'
-
 services:
   app:
     build:
